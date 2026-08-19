@@ -45,12 +45,20 @@ for file_path in files:
             missing_velocity += 1
 
         if state["vertical_rate"] is None:
+            missing_vertical_rate += 1
 
             if state["on_ground"] is True:
                 missing_vertical_rate_on_ground += 1
 
             elif state["on_ground"] is False:
                 missing_vertical_rate_airborne += 1
+
+
+        if state["on_ground"] is True:
+            on_ground_true += 1
+
+        elif state["on_ground"] is False:
+            on_ground_false += 1
 
 
         
