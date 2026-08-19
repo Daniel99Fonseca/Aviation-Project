@@ -167,27 +167,6 @@ session_summary = session_summary.merge(
 )
 
 
-def classify_session(row):
-
-    if (
-    row["distance_change"] < 0
-    and row["altitude_change"] < 0
-    and row["velocity_change"] < 0
-    and row["min_distance"] <= 10
-    and row["min_altitude_10km"] < 1000
-    ):
-        return "arrival"
-
-    elif (
-        row["distance_change"] > 0
-        and row["altitude_change"] > 0
-    ):
-        return "departure"
-
-    else:
-        return "other"
-
-
 # Classificar cada sessão
 session_summary["movement_type"] = (
     session_summary.apply(
@@ -216,6 +195,26 @@ session_summary["velocity_change"] = (
     session_summary["end_velocity"]
     - session_summary["start_velocity"]
 )
+
+def classify_session(row):
+
+    if (
+    row["distance_change"] < 0
+    and row["altitude_change"] < 0
+    and row["velocity_change"] < 0
+    and row["min_distance"] <= 10
+    and row["min_altitude_10km"] < 1000
+    ):
+        return "arrival"
+
+    elif (
+        row["distance_change"] > 0
+        and row["altitude_change"] > 0
+    ):
+        return "departure"
+
+    else:
+        return "other"
 
 print()
 print("Movement types:")
