@@ -121,25 +121,6 @@ session_summary["altitude_change"] = (
     - session_summary["start_altitude"]
 )
 
-def classify_session(row):
-
-    if (
-        row["distance_change"] < 0
-        and row["altitude_change"] < 0
-        and row["min_distance"] <= 10
-        and row["min_altitude_10km"] < 1000
-    ):
-        return "arrival"
-
-    elif (
-        row["distance_change"] > 0
-        and row["altitude_change"] > 0
-    ):
-        return "departure"
-
-    else:
-        return "other"
-
 
 session_summary["movement_type"] = session_summary.apply(
     classify_session,
@@ -187,6 +168,25 @@ session_summary = session_summary.merge(
     on=["icao24", "callsign", "session"],
     how="left"
 )
+
+def classify_session(row):
+
+    if (
+        row["distance_change"] < 0
+        and row["altitude_change"] < 0
+        and row["min_distance"] <= 10
+        and row["min_altitude_10km"] < 1000
+    ):
+        return "arrival"
+
+    elif (
+        row["distance_change"] > 0
+        and row["altitude_change"] > 0
+    ):
+        return "departure"
+
+    else:
+        return "other"
 
 print()
 print("Movement types:")
