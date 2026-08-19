@@ -170,8 +170,8 @@ velocity_summary = (
     lis_data
     .groupby(["icao24", "callsign", "session"])
     .agg(
-        start_velocity=("velocity", lambda x: x.head(3).mean()),
-        end_velocity=("velocity", lambda x: x.tail(3).mean())
+        start_velocity=("velocity", lambda x: x.head(2).mean()),
+        end_velocity=("velocity", lambda x: x.tail(2).mean())
     )
     .reset_index()
 )
@@ -190,7 +190,8 @@ session_summary["velocity_change"] = (
 def classify_session(row):
 
     if (
-    row["distance_change"] < 0
+    row["points"] >= 5
+    and row["distance_change"] < 0
     and row["altitude_change"] < 0
     and row["velocity_change"] < 0
     and row["min_distance"] <= 10
