@@ -243,3 +243,20 @@ print(
     )
     .head(20)
 )
+
+print()
+print("Arrivals with missing closest altitude:")
+
+print(
+    arrival_sessions[
+        arrival_sessions["closest_altitude"].isna()
+    ][
+        [
+            "icao24",
+            "callsign",
+            "session",
+            "points",
+            "min_distance"
+        ]
+    ]
+)
