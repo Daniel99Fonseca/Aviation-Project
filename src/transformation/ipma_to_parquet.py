@@ -9,6 +9,7 @@ OUTPUT_DIR = Path("data/processed/ipma")
 
 
 records = []
+missing_weather = 0
 
 files = RAW_DIR.glob("*.json")
 
@@ -20,6 +21,10 @@ for file_path in files:
     for timestamp, airports in data.items():
 
         for airport, weather in airports.items():
+
+            if weather is None:
+                missing_weather += 1
+                continue
 
             record = {
                 "weather_time": timestamp,
