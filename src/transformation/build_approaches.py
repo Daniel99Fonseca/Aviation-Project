@@ -102,6 +102,7 @@ session_summary = (
         points=("snapshot_time", "count"),
         start_distance=("distance_to_lis", "first"),
         end_distance=("distance_to_lis", "last"),
+        min_distance=("distance_to_lis", "min"),
         start_altitude=("baro_altitude", "first"),
         end_altitude=("baro_altitude", "last")
     )
@@ -123,6 +124,7 @@ def classify_session(row):
     if (
         row["distance_change"] < 0
         and row["altitude_change"] < 0
+        and row["min_distance"] <= 10
     ):
         return "arrival"
 
@@ -157,7 +159,8 @@ print(
             "end_distance",
             "start_altitude",
             "end_altitude",
-            "movement_type"
+            "movement_type",
+            "min_distance"
         ]
     ].head(30)
 )
