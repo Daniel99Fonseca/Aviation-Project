@@ -31,9 +31,14 @@ lis_data = df[df["distance_to_lis"] <= MAX_DISTANCE_KM].copy()
 
 # Ordenar cada aeronave cronologicamente
 lis_data = lis_data.sort_values(
-    by=["icao24", "snapshot_time"]
+    by=["icao24", "callsign", "snapshot_time"]
 )
 
+lis_data["time_gap"] = (
+    lis_data
+    .groupby(["icao24", "callsign"])["snapshot_time"]
+    .diff()
+)
 
 print("Airborne records within 40 km of LIS:", len(lis_data))
 print("Unique aircraft:", lis_data["icao24"].nunique())
@@ -52,3 +57,21 @@ print(
         ]
     ].head(30)
 )
+
+print()
+print("Time gap statistics:")
+print(lis_data["time_gap"].describe())
+
+print()
+print("Time gap percentiles:")
+print(
+    lis_data["time_gap"].quantile(
+        [0.50, 0.75, 0.90, 0.95, 0.99]
+    )
+)
+
+print()
+print("Gaps > 2 minutes:", (lis_data["time_gap"] > 120).sum())
+print("Gaps > 5 minutes:", (lis_data["time_gap"] > 300).sum())
+print("Gaps > 10 minutes:", (lis_data["time_gap"] > 600).sum())
+print("Gaps > 30 minutes:", (lis_data["time_gap"] > 1800).sum())
