@@ -170,10 +170,11 @@ session_summary = session_summary.merge(
 def classify_session(row):
 
     if (
-        row["distance_change"] < 0
-        and row["altitude_change"] < 0
-        and row["min_distance"] <= 10
-        and row["min_altitude_10km"] < 1000
+    row["distance_change"] < 0
+    and row["altitude_change"] < 0
+    and row["velocity_change"] < 0
+    and row["min_distance"] <= 10
+    and row["min_altitude_10km"] < 1000
     ):
         return "arrival"
 
@@ -195,6 +196,26 @@ session_summary["movement_type"] = (
     )
 )
 
+velocity_summary = (
+    lis_data
+    .groupby(["icao24", "callsign", "session"])
+    .agg(
+        start_velocity=("velocity", lambda x: x.head(3).mean()),
+        end_velocity=("velocity", lambda x: x.tail(3).mean())
+    )
+    .reset_index()
+)
+
+session_summary = session_summary.merge(
+    velocity_summary,
+    on=["icao24", "callsign", "session"],
+    how="left"
+)
+
+session_summary["velocity_change"] = (
+    session_summary["end_velocity"]
+    - session_summary["start_velocity"]
+)
 
 print()
 print("Movement types:")
