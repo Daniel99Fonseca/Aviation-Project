@@ -143,6 +143,31 @@ session_summary["movement_type"] = session_summary.apply(
     axis=1
 )
 
+# Ficar apenas com sessões classificadas como arrival
+arrival_sessions = session_summary[
+    session_summary["movement_type"] == "arrival"
+].copy()
+
+closest_point_altitudes = []
+
+for _, session_row in arrival_sessions.iterrows():
+
+    session_points = lis_data[
+        (lis_data["icao24"] == session_row["icao24"])
+        & (lis_data["callsign"] == session_row["callsign"])
+        & (lis_data["session"] == session_row["session"])
+    ]
+
+    closest_point = session_points.loc[
+        session_points["distance_to_lis"].idxmin()
+    ]
+
+    closest_point_altitudes.append(
+        closest_point["baro_altitude"]
+    )
+
+arrival_sessions["closest_altitude"] = closest_point_altitudes
+
 print()
 print("Movement types:")
 print(session_summary["movement_type"].value_counts())
@@ -163,4 +188,58 @@ print(
             "min_distance"
         ]
     ].head(30)
+)
+
+print()
+print("Closest-point altitude statistics:")
+print(
+    arrival_sessions["closest_altitude"].describe()
+)
+
+print()
+print("Arrival candidates by closest altitude:")
+
+print(
+    "Below 500 m:",
+    (arrival_sessions["closest_altitude"] < 500).sum()
+)
+
+print(
+    "Below 1000 m:",
+    (arrival_sessions["closest_altitude"] < 1000).sum()
+)
+
+print(
+    "Below 2000 m:",
+    (arrival_sessions["closest_altitude"] < 2000).sum()
+)
+
+print(
+    "Above 5000 m:",
+    (arrival_sessions["closest_altitude"] > 5000).sum()
+)
+
+print(
+    "Above 10000 m:",
+    (arrival_sessions["closest_altitude"] > 10000).sum()
+)
+
+print()
+print("Highest closest-point altitudes:")
+
+print(
+    arrival_sessions[
+        [
+            "icao24",
+            "callsign",
+            "session",
+            "min_distance",
+            "closest_altitude"
+        ]
+    ]
+    .sort_values(
+        by="closest_altitude",
+        ascending=False
+    )
+    .head(20)
 )
