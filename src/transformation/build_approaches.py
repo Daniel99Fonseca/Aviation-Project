@@ -260,3 +260,26 @@ print(
         ]
     ]
 )
+
+
+tap028 = lis_data[
+    (lis_data["icao24"] == "4952a2")
+    & (lis_data["callsign"] == "TAP028")
+    & (lis_data["session"] == 1)
+]
+
+print()
+print("TAP028 session:")
+
+print(
+    tap028[
+        [
+            "snapshot_time",
+            "distance_to_lis",
+            "baro_altitude",
+            "geo_altitude",
+            "velocity",
+            "vertical_rate"
+        ]
+    ]
+)
