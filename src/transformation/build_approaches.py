@@ -86,6 +86,14 @@ landing_events = lis_data[
     & (lis_data["distance_to_lis"] <= LANDING_DISTANCE_KM)
 ].copy()
 
+landing_events = (
+    landing_events
+    .sort_values("snapshot_time")
+    .drop_duplicates(
+        subset=["icao24", "callsign", "session"],
+        keep="first"
+    )
+)
 
 print("Landing events detected:", len(landing_events))
 
