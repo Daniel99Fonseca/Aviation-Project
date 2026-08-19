@@ -1,9 +1,24 @@
 import json
 from pathlib import Path
+from geopy.distance import geodesic
 
 DATA_DIR = Path("data/raw/opensky")
 
 files = list(DATA_DIR.glob("*.json"))
+
+AIRPORTS = {
+    "LIS": (38.7742, -9.1342),
+    "OPO": (41.2421, -8.6789),
+    "FAO": (37.0144, -7.9659)
+}
+
+DISTANCES = [10, 20, 40]
+
+# Airport counts to calculate density of aircrafts within a certain radius of each airport
+airport_counts = {
+    airport: {distance: 0 for distance in DISTANCES}
+    for airport in AIRPORTS
+}
 
 total_snapshots = len(files)
 total_records = 0
@@ -53,16 +68,33 @@ for file_path in files:
             elif state["on_ground"] is False:
                 missing_vertical_rate_airborne += 1
 
-
         if state["on_ground"] is True:
             on_ground_true += 1
 
         elif state["on_ground"] is False:
             on_ground_false += 1
 
+            if (
+                state["latitude"] is not None
+                and state["longitude"] is not None
+            ):
+                aircraft_position = (
+                    state["latitude"],
+                    state["longitude"]
+                )
 
-        
-        
+                for airport, airport_position in AIRPORTS.items():
+
+                    distance_km = geodesic(
+                        aircraft_position,
+                        airport_position
+                    ).km
+
+                    for distance_limit in DISTANCES:
+
+                        if distance_km <= distance_limit:
+                            airport_counts[airport][distance_limit] += 1
+
 
 print("Snapshots:", total_snapshots)
 print("Aircraft records:", total_records)
@@ -85,3 +117,14 @@ print()
 print("Missing vertical rate:")
 print("On ground:", missing_vertical_rate_on_ground)
 print("Airborne:", missing_vertical_rate_airborne)
+
+print()
+print("Airborne records near airports:")
+
+for airport, counts in airport_counts.items():
+
+    print()
+    print(airport)
+
+    for distance, count in counts.items():
+        print(f"Within {distance} km: {count}")
