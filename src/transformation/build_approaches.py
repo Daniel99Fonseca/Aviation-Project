@@ -132,24 +132,66 @@ for _, landing in landing_events.iterrows():
 print()
 print("Approaches reconstructed:", len(approach_records))
 
+approach_summaries = []
 
-# Mostrar exemplo da primeira aproximação encontrada
-if len(approach_records) > 0:
+for approach_id, approach in enumerate(approach_records, start=1):
 
-    print()
-    print("Example approach:")
+    airborne_points = approach[
+        approach["on_ground"] == False
+    ]
 
-    print(
-        approach_records[0][
-            [
-                "icao24",
-                "callsign",
-                "snapshot_time",
-                "distance_to_lis",
-                "baro_altitude",
-                "velocity",
-                "vertical_rate",
-                "on_ground"
-            ]
-        ]
-    )
+    landing_point = approach[
+        approach["on_ground"] == True
+    ].iloc[0]
+
+    summary = {
+        "approach_id": approach_id,
+        "airport": "LIS",
+        "icao24": landing_point["icao24"],
+        "callsign": landing_point["callsign"],
+        "session": landing_point["session"],
+        "start_time": approach["snapshot_time"].min(),
+        "landing_time": landing_point["snapshot_time"],
+        "duration_seconds": (
+            landing_point["snapshot_time"]
+            - approach["snapshot_time"].min()
+        ),
+
+        "points": len(approach),
+        "airborne_points": len(airborne_points),
+        "start_distance": approach.iloc[0]["distance_to_lis"],
+        "min_distance": approach["distance_to_lis"].min(),
+        "start_altitude": airborne_points.iloc[0]["baro_altitude"],
+        "last_airborne_altitude": airborne_points.iloc[-1]["baro_altitude"],
+        "start_velocity": airborne_points.iloc[0]["velocity"],
+        "last_airborne_velocity": airborne_points.iloc[-1]["velocity"],
+        "mean_vertical_rate": airborne_points["vertical_rate"].mean()
+    }
+
+    approach_summaries.append(summary)
+
+approaches_df = pd.DataFrame(approach_summaries)
+
+OUTPUT_DIR = Path("data/processed/approaches")
+
+OUTPUT_DIR.mkdir(
+    parents=True,
+    exist_ok=True
+)
+
+output_file = OUTPUT_DIR / "approaches_lis.parquet"
+
+approaches_df.to_parquet(
+    output_file,
+    index=False
+)
+
+print()
+print("Approach summary:")
+print(approaches_df.head(10))
+
+print()
+print("Total approaches:", len(approaches_df))
+
+print()
+print("Saved:", output_file)
