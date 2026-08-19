@@ -18,10 +18,10 @@ states = api.get_states(bbox=PORTUGAL_BBOX)
 
 aircraft_data = []
 
-for state in states.states:
+for state in states.states: # states.states returns information on every aircraft in bbox
     aircraft_data.append(vars(state))
 
-snapshot = {
+snapshot = { 
     "timestamp": states.time,
     "aircraft_count": len(states.states),
     "states": aircraft_data 
@@ -30,7 +30,7 @@ snapshot = {
 outputdir = Path("data/raw/opensky")
 outputdir.mkdir(parents=True, exist_ok=True)
 
-timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S") # Making filename = time api was called
 output_file = outputdir / f"opensky_{timestamp_str}.json"
 
 with open(output_file, "w", encoding="utf-8") as file:
