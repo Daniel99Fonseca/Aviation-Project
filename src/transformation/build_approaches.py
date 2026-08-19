@@ -34,6 +34,8 @@ lis_data = lis_data.sort_values(
     by=["icao24", "callsign", "snapshot_time"]
 )
 
+# Diferença de tempo entre registos consecutivos
+# da mesma aeronave e callsign
 lis_data["time_gap"] = (
     lis_data
     .groupby(["icao24", "callsign"])["snapshot_time"]
@@ -58,20 +60,37 @@ print(
     ].head(30)
 )
 
-print()
-print("Time gap statistics:")
-print(lis_data["time_gap"].describe())
+SESSION_GAP = 3600
+lis_data["new_session"] = (
+    lis_data["time_gap"].isna()
+    | (lis_data["time_gap"] > SESSION_GAP)
+)
 
-print()
-print("Time gap percentiles:")
-print(
-    lis_data["time_gap"].quantile(
-        [0.50, 0.75, 0.90, 0.95, 0.99]
-    )
+lis_data["session"] = (
+    lis_data
+    .groupby(["icao24", "callsign"])["new_session"]
+    .cumsum()
+)
+
+sessions = (
+    lis_data[
+        ["icao24", "callsign", "session"]
+    ]
+    .drop_duplicates()
 )
 
 print()
-print("Gaps > 2 minutes:", (lis_data["time_gap"] > 120).sum())
-print("Gaps > 5 minutes:", (lis_data["time_gap"] > 300).sum())
-print("Gaps > 10 minutes:", (lis_data["time_gap"] > 600).sum())
-print("Gaps > 30 minutes:", (lis_data["time_gap"] > 1800).sum())
+print("Total sessions:", len(sessions))
+
+print()
+print(sessions.head(20))
+
+session_sizes = (
+    lis_data
+    .groupby(["icao24", "callsign", "session"])
+    .size()
+)
+
+print()
+print("Session size statistics:")
+print(session_sizes.describe())
