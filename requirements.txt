@@ -2,3 +2,5 @@ requests
 python-dotenv
 git+https://github.com/openskynetwork/opensky-api.git#subdirectory=python
 geopy
+pandas
+pyarrow
