@@ -12,6 +12,8 @@ MAX_DISTANCE_KM = 40
 
 df = pd.read_parquet(INPUT_FILE)
 
+df["callsign"] = df["callsign"].str.strip()
+
 # Para estudar aproximações, interessam-nos primeiro as aeronaves no ar
 df = df[df["on_ground"] == False].copy()
 
