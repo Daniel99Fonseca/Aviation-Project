@@ -94,3 +94,70 @@ session_sizes = (
 print()
 print("Session size statistics:")
 print(session_sizes.describe())
+
+session_summary = (
+    lis_data
+    .groupby(["icao24", "callsign", "session"])
+    .agg(
+        points=("snapshot_time", "count"),
+        start_distance=("distance_to_lis", "first"),
+        end_distance=("distance_to_lis", "last"),
+        start_altitude=("baro_altitude", "first"),
+        end_altitude=("baro_altitude", "last")
+    )
+    .reset_index()
+)
+
+session_summary["distance_change"] = (
+    session_summary["end_distance"]
+    - session_summary["start_distance"]
+)
+
+session_summary["altitude_change"] = (
+    session_summary["end_altitude"]
+    - session_summary["start_altitude"]
+)
+
+def classify_session(row):
+
+    if (
+        row["distance_change"] < 0
+        and row["altitude_change"] < 0
+    ):
+        return "arrival"
+
+    elif (
+        row["distance_change"] > 0
+        and row["altitude_change"] > 0
+    ):
+        return "departure"
+
+    else:
+        return "other"
+
+
+session_summary["movement_type"] = session_summary.apply(
+    classify_session,
+    axis=1
+)
+
+print()
+print("Movement types:")
+print(session_summary["movement_type"].value_counts())
+
+print()
+print(
+    session_summary[
+        [
+            "icao24",
+            "callsign",
+            "session",
+            "points",
+            "start_distance",
+            "end_distance",
+            "start_altitude",
+            "end_altitude",
+            "movement_type"
+        ]
+    ].head(30)
+)
