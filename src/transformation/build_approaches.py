@@ -166,15 +166,6 @@ session_summary = session_summary.merge(
     how="left"
 )
 
-
-# Classificar cada sessão
-session_summary["movement_type"] = (
-    session_summary.apply(
-        classify_session,
-        axis=1
-    )
-)
-
 velocity_summary = (
     lis_data
     .groupby(["icao24", "callsign", "session"])
@@ -215,6 +206,14 @@ def classify_session(row):
 
     else:
         return "other"
+    
+# Classificar cada sessão
+session_summary["movement_type"] = (
+    session_summary.apply(
+        classify_session,
+        axis=1
+    )
+)
 
 print()
 print("Movement types:")
