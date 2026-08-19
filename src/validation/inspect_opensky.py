@@ -16,6 +16,9 @@ missing_callsign = 0
 missing_velocity = 0
 missing_vertical_rate = 0
 
+missing_vertical_rate_on_ground = 0
+missing_vertical_rate_airborne = 0
+
 on_ground_true = 0
 on_ground_false = 0
 
@@ -42,13 +45,16 @@ for file_path in files:
             missing_velocity += 1
 
         if state["vertical_rate"] is None:
-            missing_vertical_rate += 1
 
-        if state["on_ground"] is True:
-            on_ground_true += 1
+            if state["on_ground"] is True:
+                missing_vertical_rate_on_ground += 1
 
-        elif state["on_ground"] is False:
-            on_ground_false += 1
+            elif state["on_ground"] is False:
+                missing_vertical_rate_airborne += 1
+
+
+        
+        
 
 print("Snapshots:", total_snapshots)
 print("Aircraft records:", total_records)
@@ -66,3 +72,8 @@ print()
 print("On ground:")
 print("True:", on_ground_true)
 print("False:", on_ground_false)
+
+print()
+print("Missing vertical rate:")
+print("On ground:", missing_vertical_rate_on_ground)
+print("Airborne:", missing_vertical_rate_airborne)
