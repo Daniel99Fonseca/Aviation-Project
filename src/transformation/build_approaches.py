@@ -127,6 +127,7 @@ def classify_session(row):
         row["distance_change"] < 0
         and row["altitude_change"] < 0
         and row["min_distance"] <= 10
+        and row["min_altitude_10km"] < 1000
     ):
         return "arrival"
 
@@ -170,9 +171,38 @@ for _, session_row in arrival_sessions.iterrows():
 
 arrival_sessions["closest_altitude"] = closest_point_altitudes
 
+points_within_10km = lis_data[
+    lis_data["distance_to_lis"] <= 10
+]
+
+min_altitude_10km = (
+    points_within_10km
+    .groupby(["icao24", "callsign", "session"])["baro_altitude"]
+    .min()
+    .reset_index(name="min_altitude_10km")
+)
+
+session_summary = session_summary.merge(
+    min_altitude_10km,
+    on=["icao24", "callsign", "session"],
+    how="left"
+)
+
 print()
 print("Movement types:")
 print(session_summary["movement_type"].value_counts())
+print(
+    session_summary[
+        session_summary["movement_type"] == "arrival"
+    ][
+        [
+            "callsign",
+            "points",
+            "min_distance",
+            "min_altitude_10km"
+        ]
+    ].head(20)
+)
 
 print()
 print(
