@@ -37,3 +37,12 @@ df.to_parquet(output_file, index=False) # turning into parquet
 print("Rows:", len(df))
 print("Columns:", len(df.columns))
 print("Parquet saved:", output_file)
+
+print()
+print(df.columns.tolist())
+
+print()
+print(df.dtypes)
+
+print()
+print(df.head())
